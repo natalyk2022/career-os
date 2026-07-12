@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career OS</title>
+<style>
+  :root{
+    --bg:#14161F;
+    --surface:#1E212E;
+    --surface-2:#262A3A;
+    --line:#33374A;
+    --gold:#C9A227;
+    --gold-soft:#8E7527;
+    --green:#4C9A78;
+    --red:#B0554A;
+    --text:#EDEBE3;
+    --muted:#8B8D9B;
+    --font-display:'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono:'IBM Plex Mono', 'Courier New', monospace;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-display);
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:920px;margin:0 auto;padding:20px 20px 60px;}
+
+  /* HUD */
+  .hud{
+    background:linear-gradient(180deg,var(--surface-2),var(--surface));
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 20px;
+    margin-bottom:18px;
+  }
+  .hud-top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+  .hud-name{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
+  .hud-level{font-family:var(--font-mono);font-size:18px;font-weight:600;color:var(--gold);}
+  .hud-bar-wrap{margin-top:10px;background:var(--surface);border:1px solid var(--line);border-radius:6px;height:10px;overflow:hidden;}
+  .hud-bar{height:100%;background:linear-gradient(90deg,var(--gold-soft),var(--gold));transition:width .4s ease;}
+  .hud-meta{display:flex;justify-content:space-between;margin-top:6px;font-family:var(--font-mono);font-size:11px;color:var(--muted);}
+  .hud-stats{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap;}
+  .hud-stat{font-family:var(--font-mono);font-size:12px;color:var(--muted);}
+  .hud-stat b{color:var(--text);font-size:15px;display:block;font-weight:600;}
+
+  /* Tabs */
+  .tabs{display:flex;gap:2px;margin-bottom:18px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:3px;}
+  .tab{flex:1;text-align:center;padding:9px 8px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);user-select:none;transition:all .15s;}
+  .tab.active{background:var(--surface-2);color:var(--gold);}
+  .tab:hover:not(.active){color:var(--text);}
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:14px;transition:border-color .2s, background .2s;}
+  .card.block-met{border-color:var(--green);background:linear-gradient(180deg, rgba(76,154,120,.08), var(--surface));}
+  .card.block-met .card-xp{color:var(--green);}
+  .card h3{margin:0 0 12px;font-size:14px;letter-spacing:.04em;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .card h3 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .card-xp{margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--gold);}
+
+  .row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13.5px;}
+  .row input[type=checkbox]{width:17px;height:17px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;}
+  .row label{cursor:pointer;flex:1;color:var(--text);}
+  .row .xp-tag{font-family:var(--font-mono);font-size:11px;color:var(--muted);}
+  .row.done label{color:var(--muted);text-decoration:line-through;}
+
+  .count-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13.5px;}
+  .count-row label{flex:1;}
+  .count-row input[type=number]{width:60px;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;color:var(--text);padding:5px 8px;font-family:var(--font-mono);font-size:13px;}
+
+  textarea, input[type=text], input[type=number], select{
+    width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;
+    color:var(--text);padding:8px 10px;font-family:var(--font-display);font-size:13.5px;margin-top:4px;
+  }
+  textarea{resize:vertical;min-height:50px;}
+  .field{margin-bottom:12px;}
+  .field label{font-size:12px;color:var(--muted);display:block;margin-bottom:2px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  @media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+  button{
+    background:var(--gold);color:#14161F;border:none;border-radius:6px;
+    padding:9px 18px;font-weight:600;font-size:13px;cursor:pointer;font-family:var(--font-display);
+  }
+  button:hover{background:#DDB637;}
+  button.secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--line);}
+  button.secondary:hover{background:var(--surface);}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{text-align:left;color:var(--muted);font-weight:500;padding:7px 8px;border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase;letter-spacing:.03em;}
+  td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:hover td{background:var(--surface-2);}
+  .status-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-family:var(--font-mono);}
+  .status-Applied{background:#2A3550;color:#8FB0E8;}
+  .status-Screening{background:#3A3550;color:#B49FE0;}
+  .status-Interview{background:#3A4A2A;color:#A8D08D;}
+  .status-Offer{background:#4A3A1A;color:var(--gold);}
+  .status-Rejected{background:#4A2A2A;color:#D08D8D;}
+  .status-Ghosted{background:#2A2A2A;color:var(--muted);}
+  .link-cell a{color:var(--gold);text-decoration:none;font-size:12px;}
+  .empty{color:var(--muted);font-size:13px;text-align:center;padding:24px 0;}
+
+  .day-selector{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+  .day-selector input{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;color:var(--text);padding:6px 10px;font-family:var(--font-mono);font-size:13px;}
+
+  .achv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+  .achv{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center;font-size:12px;opacity:.35;}
+  .achv.unlocked{opacity:1;border-color:var(--gold-soft);}
+  .achv .icon{font-size:22px;display:block;margin-bottom:4px;}
+
+  .save-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#0D1A14;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s;}
+  .save-toast.show{opacity:1;}
+
+  .weekly-block{margin-bottom:14px;}
+  .weekly-block label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;}
+  .weekly-goal{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--line);}
+  .weekly-goal .num{font-family:var(--font-mono);color:var(--gold);}
+  .weekly-goal.exceeded .num{color:var(--green);}
+  .weekly-goal.exceeded span:first-child::after{content:' ✓';color:var(--green);}
+  .praise-banner{margin-top:10px;background:rgba(76,154,120,.12);border:1px solid var(--green);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--green);line-height:1.6;}
+  .refl-day{border-bottom:1px solid var(--line);padding:10px 0;}
+  .refl-day:last-child{border-bottom:none;}
+  .refl-date{font-family:var(--font-mono);font-size:11px;color:var(--gold);margin-bottom:4px;}
+  .refl-line{font-size:12.5px;color:var(--text);margin-bottom:2px;}
+  .refl-line b{color:var(--muted);font-weight:500;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hud">
+    <div class="hud-top">
+      <div class="hud-name">Natalia — Global HR Strategist</div>
+      <div class="hud-level" id="hudLevel">Level 1 · Candidate</div>
+    </div>
+    <div class="hud-bar-wrap"><div class="hud-bar" id="hudBar" style="width:0%"></div></div>
+    <div class="hud-meta"><span id="hudXpText">0 XP</span><span id="hudNextText">to next level: —</span></div>
+    <div id="hudLevelDesc" style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.4;"></div>
+    <div class="hud-stats">
+      <div class="hud-stat">Streak<b id="statStreak">0</b></div>
+      <div class="hud-stat">Applications (total)<b id="statApps">0</b></div>
+      <div class="hud-stat">Contacts (total)<b id="statContacts">0</b></div>
+      <div class="hud-stat">Interviews<b id="statInterviews">0</b></div>
+    </div>
+  </div>
+
+  <div class="hud" style="padding:10px 16px;margin-bottom:14px;">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <span style="font-size:11px;color:var(--muted);white-space:nowrap;">Google Sheets URL:</span>
+      <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec" style="flex:1;min-width:200px;margin:0;font-size:11px;padding:5px 8px;">
+      <button class="secondary" id="btnConnectSheet" style="font-size:11px;padding:5px 10px;">Connect</button>
+      <button class="secondary" id="btnSyncNow" style="font-size:11px;padding:5px 10px;">Sync now</button>
+      <span id="syncStatus" style="font-size:11px;color:var(--muted);white-space:nowrap;">⚪ local only</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="today">Today</div>
+    <div class="tab" data-tab="missions">Mission Board</div>
+    <div class="tab" data-tab="progress">Progress</div>
+    <div class="tab" data-tab="weekly">Weekly Review</div>
+  </div>
+
+  <!-- TODAY -->
+  <div class="panel active" id="panel-today">
+    <div class="day-selector">
+      <span style="font-size:12px;color:var(--muted)">Date:</span>
+      <input type="date" id="dayPicker">
+      <button class="secondary" id="btnToday" style="padding:6px 12px;font-size:12px;">Today</button>
+    </div>
+
+    <div class="card" id="block-1">
+      <h3><span class="dot" style="background:#4CA870"></span>Block 1 · Applications<span class="card-xp" id="block-1-tag">0 / 20 XP min.</span></h3>
+      <div class="count-row"><label>Simple application <span class="xp-tag">2 XP</span></label><input type="number" min="0" id="in-apps-simple" value="0"></div>
+      <div class="count-row"><label>+ tailored CV <span class="xp-tag">7 XP</span></label><input type="number" min="0" id="in-apps-cv" value="0"></div>
+      <div class="count-row"><label>+ cover letter <span class="xp-tag">5 XP</span></label><input type="number" min="0" id="in-apps-cover" value="0"></div>
+      <div class="count-row"><label>+ messaged the recruiter <span class="xp-tag">7 XP</span></label><input type="number" min="0" id="in-apps-recruiter" value="0"></div>
+      <div class="count-row"><label>Found through network <span class="xp-tag">10 XP</span></label><input type="number" min="0" id="in-apps-network" value="0"></div>
+    </div>
+
+    <div class="card" id="block-2">
+      <h3><span class="dot" style="background:#6A8FD8"></span>Block 2 · LinkedIn<span class="card-xp" id="block-2-tag">0 / 11 XP min.</span></h3>
+      <div class="count-row"><label>New contact <span class="xp-tag">0.2 XP</span></label><input type="number" min="0" id="in-contacts" value="0"></div>
+      <div class="count-row"><label>Comment <span class="xp-tag">3 XP</span></label><input type="number" min="0" id="in-comments" value="0"></div>
+      <div class="count-row"><label>Meaningful likes <span class="xp-tag">1 XP / 5 likes</span></label><input type="number" min="0" id="in-likes" value="0"></div>
+      <div class="row"><input type="checkbox" id="in-post"><label for="in-post">Published a post</label><span class="xp-tag">10 XP</span></div>
+    </div>
+
+    <div class="card" id="block-3">
+      <h3><span class="dot" style="background:#B49FE0"></span>Block 3 · English<span class="card-xp" id="block-3-tag">0 / 6 XP min.</span></h3>
+      <div class="count-row"><label>Active practice — tutor / mock interview / self-talk / recording yourself <span class="xp-tag">1 XP / 5 min</span></label><input type="number" min="0" step="5" id="in-english-practice" value="0"></div>
+      <div class="count-row"><label>Movies / series in English <span class="xp-tag">2 XP / 30 min</span></label><input type="number" min="0" step="5" id="in-english-movies" value="0"></div>
+    </div>
+
+    <div class="card" id="block-4">
+      <h3><span class="dot" style="background:#E0A24A"></span>Block 4 · AI<span class="card-xp" id="block-4-tag">0 / 3 XP min.</span></h3>
+      <div class="count-row"><label>Learning — course/article/video about AI <span class="xp-tag">3 XP / 30 min</span></label><input type="number" min="0" step="5" id="in-ai-learn" value="0"></div>
+      <div class="count-row"><label>Practice — agent/automation/case <span class="xp-tag">1 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-ai-build" value="0"></div>
+      <div class="row"><input type="checkbox" id="in-ai-video"><label for="in-ai-video">Recorded a video for AI Lab</label><span class="xp-tag">15 XP</span></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot" style="background:#8B8D9B"></span>Bonus · networking, interviews, offers</h3>
+      <div class="count-row"><label>Interview prep — STAR cases, mock questions, etc. <span class="xp-tag">1 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-interview-prep" value="0"></div>
+      <div class="count-row"><label>New network contact (reached out first / met someone / called outside an interview) <span class="xp-tag">5 XP each</span></label><input type="number" min="0" id="in-network" value="0"></div>
+      <div class="count-row"><label>Had an interview today <span class="xp-tag">20 XP</span></label><input type="number" min="0" id="in-interviews" value="0"></div>
+      <div class="count-row"><label>Rejection after an interview <span class="xp-tag">10 XP each</span></label><input type="number" min="0" id="in-rejection" value="0"></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot" style="background:#EDEBE3"></span>Block 5 · Reflection</h3>
+      <div class="field"><label>Today I did well because:</label><textarea id="in-r1"></textarea></div>
+      <div class="field"><label>What concrete fact today moved me closer to my goal?</label><textarea id="in-r2"></textarea></div>
+      <div class="field"><label>Tomorrow, the most important thing is:</label><textarea id="in-r3"></textarea></div>
+    </div>
+
+    <button id="btnSaveDay" style="width:100%;padding:12px;font-size:14px;">Add to today · <span id="dayXpPreview">0 XP</span></button>
+  </div>
+
+  <!-- MISSION BOARD -->
+  <div class="panel" id="panel-missions">
+    <div class="card">
+      <h3>Add a vacancy</h3>
+      <div class="grid2">
+        <div class="field"><label>Company</label><input type="text" id="vCompany"></div>
+        <div class="field"><label>Role</label><input type="text" id="vRole"></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label>Location</label><input type="text" id="vLocation" placeholder="Remote / PL / DE..."></div>
+        <div class="field"><label>Salary range</label><input type="text" id="vSalary" placeholder="€100-130k"></div>
+        <div class="field"><label>Source</label>
+          <select id="vSource">
+            <option>LinkedIn</option><option>hh.ru</option><option>Web3.career</option>
+            <option>Referral</option><option>Company website</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Job link</label><input type="text" id="vLink"></div>
+        <div class="field"><label>Status</label>
+          <select id="vStatus">
+            <option>Applied</option><option>Screening</option><option>Interview</option>
+            <option>Offer</option><option>Rejected</option><option>Ghosted</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Next step + date</label>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="vNextStep" placeholder="Follow-up">
+          <input type="date" id="vNextDate" style="width:140px;">
+        </div>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="vNotes"></textarea></div>
+      <button id="btnAddVacancy">Add to Mission Board</button>
+    </div>
+
+    <div class="card">
+      <h3>All vacancies <span class="card-xp" id="vacancyCount">0</span></h3>
+      <div style="margin-bottom:10px;">
+        <select id="filterStatus" style="width:220px;display:inline-block;">
+          <option value="">All statuses</option>
+          <option>Applied</option><option>Screening</option><option>Interview</option>
+          <option>Offer</option><option>Rejected</option><option>Ghosted</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="vacancyTable">
+          <thead><tr>
+            <th>Company</th><th>Role</th><th>Location</th><th>Salary</th><th>Source</th>
+            <th>Status</th><th>Next step</th><th>Link</th><th></th>
+          </tr></thead>
+          <tbody id="vacancyBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="vacancyEmpty" style="display:none;">Nothing here yet — add your first vacancy above.</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="panel" id="panel-progress">
+    <div class="card">
+      <div class="day-selector">
+        <span style="font-size:12px;color:var(--muted)">Week starting (Monday):</span>
+        <input type="date" id="progressWeekPicker">
+        <button class="secondary" id="btnProgressThisWeek" style="padding:6px 12px;font-size:12px;">This week</button>
+      </div>
+      <h3 style="margin-top:14px;">Weekly progress by block</h3>
+      <div class="weekly-goal" id="wBlock1Row"><span>Block 1 · Applications</span><span class="num" id="wBlock1">0 / 140 XP</span></div>
+      <div class="weekly-goal" id="wBlock2Row"><span>Block 2 · LinkedIn</span><span class="num" id="wBlock2">0 / 133 XP</span></div>
+      <div class="weekly-goal" id="wBlock3Row"><span>Block 3 · English</span><span class="num" id="wBlock3">0 / 42 XP</span></div>
+      <div class="weekly-goal" id="wBlock4Row" style="border-bottom:none;"><span>Block 4 · AI</span><span class="num" id="wBlock4">0 / 42 XP</span></div>
+      <div id="weeklyPraise"></div>
+    </div>
+    <div class="card">
+      <h3>The week in numbers</h3>
+      <div class="weekly-goal"><span>Applications (all types)</span><span class="num" id="wApps">0</span></div>
+      <div class="weekly-goal"><span>New LinkedIn contacts</span><span class="num" id="wContacts">0</span></div>
+      <div class="weekly-goal" id="wPostsRow"><span>Posts (soft goal — 2/week)</span><span class="num" id="wPosts">0 / 2</span></div>
+      <div class="weekly-goal"><span>AI — practice minutes</span><span class="num" id="wAiMin">0</span></div>
+      <div class="weekly-goal" style="border-bottom:none;"><span>English, hours</span><span class="num" id="wEnglish">0 h</span></div>
+    </div>
+    <div class="card">
+      <h3>Achievements</h3>
+      <div class="achv-grid" id="achvGrid"></div>
+    </div>
+    <div class="card">
+      <h3>Levels</h3>
+      <div id="levelList" style="font-size:13px;line-height:2;"></div>
+    </div>
+  </div>
+
+  <!-- WEEKLY REVIEW -->
+  <div class="panel" id="panel-weekly">
+    <div class="card">
+      <h3>Career Review — Sunday</h3>
+      <div class="day-selector">
+        <span style="font-size:12px;color:var(--muted)">Week starting (Monday):</span>
+        <input type="date" id="weekPicker">
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Reflection for the week</h3>
+      <div id="weekReflections"></div>
+    </div>
+
+    <div class="card">
+      <div class="field"><label>Wins of the week (at least 5, anything counts)</label><textarea id="w-wins" style="min-height:80px;"></textarea></div>
+      <div class="field"><label>How many interviews, and what to improve</label><textarea id="w-interviews"></textarea></div>
+      <div class="field"><label>What worked</label><textarea id="w-worked"></textarea></div>
+      <div class="field"><label>What didn't work</label><textarea id="w-notworked"></textarea></div>
+      <div class="field"><label>What was surprising</label><textarea id="w-surprise"></textarea></div>
+      <div class="field"><label>What to change next week</label><textarea id="w-change"></textarea></div>
+      <button id="btnSaveWeek">Save weekly review</button>
+    </div>
+  </div>
+
+</div>
+<div class="save-toast" id="saveToast">Saved</div>
+
+<script>
+const LEVELS = [
+  {name:'Candidate', icon:'🌱', min:0, desc:'Getting packaged: CV, LinkedIn, first applications'},
+  {name:'Visible Professional', icon:'🌿', min:300, desc:"You're visible on the market: steady content, first inbound from recruiters"},
+  {name:'International HR Leader', icon:'🌳', min:800, desc:'The funnel is working: live processes, interviews at several companies at once'},
+  {name:'AI HR Expert', icon:'🚀', min:1500, desc:'AI-HR expertise is visible to the market: cases, tools, recognition beyond your own circle'},
+  {name:'Thought Leader', icon:'👑', min:2500, desc:'Offer closed, visibility keeps working for you without daily effort'},
+];
+const ACHIEVEMENTS = [
+  {id:'first_app', icon:'🎯', name:'First Application', check: s => totalCount(s,'apps') >= 1},
+  {id:'first_interview', icon:'🥇', name:'First Interview', check: s => totalCount(s,'interviews') >= 1},
+  {id:'first_post', icon:'📝', name:'First LinkedIn Post', check: s => totalCount(s,'post') >= 1},
+  {id:'50_apps', icon:'🎯', name:'50 Applications', check: s => totalCount(s,'apps') >= 50},
+  {id:'100_contacts', icon:'🌍', name:'100 Contacts', check: s => totalCount(s,'contacts') >= 100},
+  {id:'10_posts', icon:'📣', name:'10 LinkedIn Posts', check: s => totalCount(s,'post') >= 10},
+  {id:'first_video', icon:'🎥', name:'First AI Lab Video', check: s => totalCount(s,'video') >= 1},
+  {id:'first_offer', icon:'👑', name:'First Offer', check: s => (s.vacancies||[]).some(v=>v.status==='Offer')},
+];
+
+let state = null;
+
+// Works inside a Claude artifact (window.storage) AND in a plain browser
+// (falls back to localStorage) — needed since window.storage only exists
+// inside Claude's artifact sandbox.
+const hasArtifactStorage = (typeof window !== 'undefined' && typeof window.storage !== 'undefined');
+const storageAPI = {
+  async get(key){
+    if(hasArtifactStorage) return await window.storage.get(key);
+    const val = localStorage.getItem(key);
+    if(val === null) throw new Error('not found: ' + key);
+    return {key, value: val};
+  },
+  async set(key, value){
+    if(hasArtifactStorage) return await window.storage.set(key, value);
+    localStorage.setItem(key, value);
+    return {key, value};
+  }
+};
+
+let APPS_SCRIPT_URL = '';
+
+async function loadConfig(){
+  try{
+    const res = await storageAPI.get('careeros:config');
+    const cfg = JSON.parse(res.value);
+    APPS_SCRIPT_URL = cfg.scriptUrl || '';
+  }catch(e){ APPS_SCRIPT_URL = ''; }
+}
+async function saveConfig(){
+  await storageAPI.set('careeros:config', JSON.stringify({scriptUrl: APPS_SCRIPT_URL}));
+}
+async function apiGetState(){
+  if(!APPS_SCRIPT_URL) return null;
+  try{
+    const res = await fetch(APPS_SCRIPT_URL + '?action=getState');
+    if(!res.ok) throw new Error('bad response');
+    return await res.json();
+  }catch(e){
+    console.error('Career OS: failed to fetch data from Google Sheets', e);
+    return null;
+  }
+}
+function apiPost(action, payload){
+  if(!APPS_SCRIPT_URL){
+    console.warn('Career OS: skipped syncing "' + action + '" — no Google Sheets URL is connected right now.');
+    return false;
+  }
+  const url = APPS_SCRIPT_URL + '?action=' + encodeURIComponent(action) + '&payload=' + encodeURIComponent(JSON.stringify(payload));
+  fetch(url).catch(e => console.error('Career OS: failed to send data to Google Sheets', e));
+  return true;
+}
+function updateSyncStatus(){
+  const el = document.getElementById('syncStatus');
+  el.textContent = APPS_SCRIPT_URL ? '🟢 Google Sheets' : '⚪ local only';
+}
+
+async function loadState(){
+  await loadConfig();
+  document.getElementById('scriptUrlInput').value = APPS_SCRIPT_URL;
+  updateSyncStatus();
+  if(APPS_SCRIPT_URL){
+    const remote = await apiGetState();
+    if(remote){
+      state = {vacancies: remote.vacancies||[], dailyLogs: remote.dailyLogs||{}, weeklyReviews: remote.weeklyReviews||{}};
+      await saveLocalCache();
+      return;
+    }
+  }
+  try{
+    const res = await storageAPI.get('careeros:state');
+    state = JSON.parse(res.value);
+  }catch(e){
+    state = {vacancies:[], dailyLogs:{}, weeklyReviews:{}};
+    await saveLocalCache();
+  }
+}
+async function saveLocalCache(){
+  await storageAPI.set('careeros:state', JSON.stringify(state));
+}
+function toast(msg){
+  const t = document.getElementById('saveToast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1600);
+}
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function totalCount(s, field){
+  let sum = 0;
+  Object.values(s.dailyLogs||{}).forEach(log=>{
+    if(field==='apps') sum += (log.appsSimple||0)+(log.appsCV||0)+(log.appsCover||0)+(log.appsRecruiter||0)+(log.appsNetwork||0);
+    if(field==='contacts') sum += (log.contacts||0);
+    if(field==='interviews') sum += (log.interviews||0);
+    if(field==='post') sum += (log.post?1:0);
+    if(field==='video') sum += (log.aiVideo?1:0);
+  });
+  return sum;
+}
+function dayXP(log){
+  let xp = 0;
+  xp += (log.appsSimple||0)*2 + (log.appsCV||0)*7 + (log.appsCover||0)*5 + (log.appsRecruiter||0)*7 + (log.appsNetwork||0)*10;
+  xp += (log.contacts||0)*0.2;
+  xp += (log.comments||0)*3;
+  xp += Math.round((log.likes||0)/5*1);
+  xp += log.post ? 10 : 0;
+  xp += Math.round((log.englishPracticeMin||0)/5*1) + Math.round((log.englishMoviesMin||0)/30*2);
+  xp += Math.round((log.aiLearnMin||0)/30*3) + Math.round((log.aiBuildMin||0)/10*1) + (log.aiVideo?15:0);
+  xp += (log.network||0) * 5;
+  xp += Math.round((log.interviewPrepMin||0)/10*1);
+  xp += (log.interviews||0)*20;
+  xp += (log.rejection||0) * 10;
+  return xp;
+}
+function totalXP(){
+  let sum = 0;
+  Object.values(state.dailyLogs||{}).forEach(log=> sum += dayXP(log));
+  return sum;
+}
+function getLevel(xp){
+  let current = LEVELS[0], next = null;
+  for(let i=0;i<LEVELS.length;i++){
+    if(xp >= LEVELS[i].min) current = LEVELS[i];
+  }
+  const idx = LEVELS.indexOf(current);
+  next = LEVELS[idx+1] || null;
+  return {current, next, idx};
+}
+function getStreak(){
+  let streak = 0;
+  let d = new Date();
+  const todayLog = state.dailyLogs[d.toISOString().slice(0,10)];
+  if(!(todayLog && dayXP(todayLog) > 0)){
+    d.setDate(d.getDate()-1);
+  }
+  while(true){
+    const iso = d.toISOString().slice(0,10);
+    const log = state.dailyLogs[iso];
+    if(log && dayXP(log) > 0){ streak++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+function weekStart(dateStr){
+  const d = new Date(dateStr);
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1 - day);
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().slice(0,10);
+}
+function weekStats(weekStartIso){
+  const wsDate = new Date(weekStartIso);
+  const weDate = new Date(wsDate);
+  weDate.setDate(weDate.getDate()+7);
+  let apps=0, contacts=0, posts=0, aiMin=0, englishMin=0;
+  const blockTotals = {1:0, 2:0, 3:0, 4:0};
+  Object.entries(state.dailyLogs).forEach(([iso, log])=>{
+    const d = new Date(iso);
+    if(d >= wsDate && d < weDate){
+      apps += (log.appsSimple||0)+(log.appsCV||0)+(log.appsCover||0)+(log.appsRecruiter||0)+(log.appsNetwork||0);
+      contacts += log.contacts||0;
+      posts += log.post?1:0;
+      aiMin += (log.aiLearnMin||0)+(log.aiBuildMin||0);
+      englishMin += (log.englishPracticeMin||0) + (log.englishMoviesMin||0);
+      const bx = blockXP(log);
+      [1,2,3,4].forEach(k=> blockTotals[k] += bx[k]);
+    }
+  });
+  return {apps, contacts, posts, aiMin, englishMin, blockTotals};
+}
+
+function renderHUD(){
+  const xp = totalXP();
+  const {current, next} = getLevel(xp);
+  document.getElementById('hudLevel').textContent = `${current.icon} Level ${LEVELS.indexOf(current)+1} · ${current.name}`;
+  const span = next ? (next.min - current.min) : 1;
+  const progressInLevel = xp - current.min;
+  const pct = next ? Math.min(100, (progressInLevel/span)*100) : 100;
+  document.getElementById('hudBar').style.width = pct+'%';
+  document.getElementById('hudXpText').textContent = `${xp} XP`;
+  document.getElementById('hudNextText').textContent = next ? `to "${next.name}": ${next.min - xp} XP` : 'max level reached';
+  document.getElementById('hudLevelDesc').textContent = current.desc;
+  document.getElementById('statStreak').textContent = getStreak();
+  document.getElementById('statApps').textContent = totalCount(state,'apps');
+  document.getElementById('statContacts').textContent = totalCount(state,'contacts');
+  document.getElementById('statInterviews').textContent = totalCount(state,'interviews');
+}
+
+const COUNT_FIELDS = ['in-apps-simple','in-apps-cv','in-apps-cover','in-apps-recruiter','in-apps-network','in-contacts','in-comments','in-likes','in-english-practice','in-english-movies','in-ai-learn','in-ai-build','in-interviews','in-rejection','in-network','in-interview-prep'];
+const CHECK_FIELDS = ['in-post','in-ai-video'];
+function loadDayForm(iso){
+  const log = state.dailyLogs[iso] || {};
+  COUNT_FIELDS.forEach(id=> document.getElementById(id).value = 0);
+  CHECK_FIELDS.forEach(id=> document.getElementById(id).checked = false);
+  document.getElementById('in-r1').value = log.r1||'';
+  document.getElementById('in-r2').value = log.r2||'';
+  document.getElementById('in-r3').value = log.r3||'';
+  updateDayXpPreview();
+}
+function readDayForm(){
+  return {
+    appsSimple: parseInt(document.getElementById('in-apps-simple').value)||0,
+    appsCV: parseInt(document.getElementById('in-apps-cv').value)||0,
+    appsCover: parseInt(document.getElementById('in-apps-cover').value)||0,
+    appsRecruiter: parseInt(document.getElementById('in-apps-recruiter').value)||0,
+    appsNetwork: parseInt(document.getElementById('in-apps-network').value)||0,
+    contacts: parseInt(document.getElementById('in-contacts').value)||0,
+    comments: parseInt(document.getElementById('in-comments').value)||0,
+    likes: parseInt(document.getElementById('in-likes').value)||0,
+    post: document.getElementById('in-post').checked,
+    englishPracticeMin: parseInt(document.getElementById('in-english-practice').value)||0,
+    englishMoviesMin: parseInt(document.getElementById('in-english-movies').value)||0,
+    aiLearnMin: parseInt(document.getElementById('in-ai-learn').value)||0,
+    aiBuildMin: parseInt(document.getElementById('in-ai-build').value)||0,
+    aiVideo: document.getElementById('in-ai-video').checked,
+    network: parseInt(document.getElementById('in-network').value)||0,
+    interviewPrepMin: parseInt(document.getElementById('in-interview-prep').value)||0,
+    interviews: parseInt(document.getElementById('in-interviews').value)||0,
+    rejection: parseInt(document.getElementById('in-rejection').value)||0,
+    r1: document.getElementById('in-r1').value,
+    r2: document.getElementById('in-r2').value,
+    r3: document.getElementById('in-r3').value,
+  };
+}
+function blockXP(log){
+  return {
+    1: (log.appsSimple||0)*2 + (log.appsCV||0)*7 + (log.appsCover||0)*5 + (log.appsRecruiter||0)*7 + (log.appsNetwork||0)*10,
+    2: (log.contacts||0)*0.2 + (log.comments||0)*3 + Math.round((log.likes||0)/5*1) + (log.post?10:0),
+    3: Math.round((log.englishPracticeMin||0)/5*1) + Math.round((log.englishMoviesMin||0)/30*2),
+    4: Math.round((log.aiLearnMin||0)/30*3) + Math.round((log.aiBuildMin||0)/10*1) + (log.aiVideo?15:0),
+  };
+}
+const BLOCK_MIN = {1:20, 2:11, 3:6, 4:3};
+function renderBlockHighlights(log){
+  const bx = blockXP(log);
+  Object.keys(BLOCK_MIN).forEach(k=>{
+    const xp = bx[k];
+    const met = xp >= BLOCK_MIN[k];
+    document.getElementById('block-'+k).classList.toggle('block-met', met);
+    document.getElementById('block-'+k+'-tag').textContent = `${xp} / ${BLOCK_MIN[k]} XP min.${met?' ✓':''}`;
+  });
+}
+function mergeLogs(saved, draft){
+  const merged = {...saved};
+  ['appsSimple','appsCV','appsCover','appsRecruiter','appsNetwork','contacts','comments','likes','englishPracticeMin','englishMoviesMin','aiLearnMin','aiBuildMin','interviews','rejection','network','interviewPrepMin'].forEach(k=>{
+    merged[k] = (saved[k]||0) + (draft[k]||0);
+  });
+  ['post','aiVideo'].forEach(k=>{
+    merged[k] = !!(saved[k] || draft[k]);
+  });
+  ['r1','r2','r3'].forEach(k=>{
+    merged[k] = draft[k] ? draft[k] : (saved[k]||'');
+  });
+  return merged;
+}
+function effectiveLog(iso){
+  return mergeLogs(state.dailyLogs[iso]||{}, readDayForm());
+}
+function updateDayXpPreview(){
+  const iso = document.getElementById('dayPicker').value || todayISO();
+  const log = effectiveLog(iso);
+  document.getElementById('dayXpPreview').textContent = dayXP(log) + ' XP total today';
+  renderBlockHighlights(log);
+}
+
+function renderVacancies(){
+  const filter = document.getElementById('filterStatus').value;
+  const body = document.getElementById('vacancyBody');
+  body.innerHTML = '';
+  const list = (state.vacancies||[]).filter(v => !filter || v.status===filter);
+  document.getElementById('vacancyCount').textContent = (state.vacancies||[]).length;
+  document.getElementById('vacancyEmpty').style.display = list.length ? 'none' : 'block';
+  list.slice().reverse().forEach(v=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(v.company)}</td>
+      <td>${escapeHtml(v.role)}</td>
+      <td>${escapeHtml(v.location||'')}</td>
+      <td>${escapeHtml(v.salary||'')}</td>
+      <td>${escapeHtml(v.source||'')}</td>
+      <td><span class="status-pill status-${v.status}">${v.status}</span></td>
+      <td>${escapeHtml(v.nextStep||'')}${v.nextDate?' · '+v.nextDate:''}</td>
+      <td class="link-cell">${v.link? `<a href="${escapeAttr(v.link)}" target="_blank">open</a>` : ''}</td>
+      <td><button class="secondary" style="padding:4px 8px;font-size:11px;" data-del="${v.id}">✕</button></td>
+    `;
+    body.appendChild(tr);
+  });
+  body.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      state.vacancies = state.vacancies.filter(v=>v.id !== btn.dataset.del);
+      await saveLocalCache();
+      apiPost('deleteVacancy', {id: btn.dataset.del});
+      renderVacancies(); renderHUD(); renderProgress();
+    });
+  });
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+const BLOCK_NAMES = {1:'Block 1 · Applications', 2:'Block 2 · LinkedIn', 3:'Block 3 · English', 4:'Block 4 · AI'};
+function renderProgress(weekStartIso){
+  weekStartIso = weekStartIso || document.getElementById('progressWeekPicker').value || weekStart(todayISO());
+  const ws = weekStats(weekStartIso);
+
+  const praises = [];
+  [1,2,3,4].forEach(k=>{
+    const value = ws.blockTotals[k];
+    const goal = BLOCK_MIN[k] * 7;
+    document.getElementById('wBlock'+k).textContent = `${value} / ${goal} XP`;
+    const met = value >= goal;
+    document.getElementById('wBlock'+k+'Row').classList.toggle('exceeded', met);
+    if(value > goal){
+      praises.push(`🔥 ${BLOCK_NAMES[k]} exceeded by ${value-goal} XP over the weekly minimum.`);
+    }
+  });
+  const praiseBox = document.getElementById('weeklyPraise');
+  praiseBox.innerHTML = praises.length ? `<div class="praise-banner">${praises.join('<br>')}</div>` : '';
+
+  document.getElementById('wApps').textContent = ws.apps;
+  document.getElementById('wContacts').textContent = ws.contacts;
+  document.getElementById('wAiMin').textContent = ws.aiMin;
+  document.getElementById('wEnglish').textContent = (ws.englishMin/60).toFixed(1) + ' h';
+  document.getElementById('wPosts').textContent = `${ws.posts} / 2`;
+  document.getElementById('wPostsRow').classList.toggle('exceeded', ws.posts >= 2);
+
+  const grid = document.getElementById('achvGrid');
+  grid.innerHTML = '';
+  ACHIEVEMENTS.forEach(a=>{
+    const unlocked = a.check(state);
+    const div = document.createElement('div');
+    div.className = 'achv' + (unlocked?' unlocked':'');
+    div.innerHTML = `<span class="icon">${a.icon}</span>${a.name}`;
+    grid.appendChild(div);
+  });
+
+  const levelList = document.getElementById('levelList');
+  const xp = totalXP();
+  levelList.innerHTML = LEVELS.map((l,i)=>{
+    const reached = xp >= l.min;
+    return `<div style="margin-bottom:8px;"><span style="color:${reached?'var(--text)':'var(--muted)'}">${l.icon} Level ${i+1} — ${l.name} <span style="font-family:var(--font-mono);font-size:11px;color:var(--muted)">(from ${l.min} XP)</span></span><div style="font-size:11.5px;color:var(--muted);margin-top:2px;">${l.desc}</div></div>`;
+  }).join('');
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+name));
+}
+
+function renderWeekReflections(weekStartIso){
+  const box = document.getElementById('weekReflections');
+  const wsDate = new Date(weekStartIso);
+  const days = [];
+  for(let i=0;i<7;i++){
+    const d = new Date(wsDate);
+    d.setDate(d.getDate()+i);
+    const iso = d.toISOString().slice(0,10);
+    const log = state.dailyLogs[iso];
+    if(log && (log.r1 || log.r2 || log.r3)){
+      days.push({iso, log});
+    }
+  }
+  if(!days.length){
+    box.innerHTML = '<div class="empty">No Reflection entries for this week yet.</div>';
+    return;
+  }
+  box.innerHTML = days.map(({iso, log})=>`
+    <div class="refl-day">
+      <div class="refl-date">${iso}</div>
+      ${log.r1 ? `<div class="refl-line"><b>Did well:</b> ${escapeHtml(log.r1)}</div>` : ''}
+      ${log.r2 ? `<div class="refl-line"><b>Moved closer:</b> ${escapeHtml(log.r2)}</div>` : ''}
+      ${log.r3 ? `<div class="refl-line"><b>Tomorrow:</b> ${escapeHtml(log.r3)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+async function init(){
+  document.getElementById('btnConnectSheet').addEventListener('click', async ()=>{
+    APPS_SCRIPT_URL = document.getElementById('scriptUrlInput').value.trim();
+    await saveConfig();
+    updateSyncStatus();
+    toast('Loading data from Google Sheets…');
+    await loadState();
+    loadDayForm(document.getElementById('dayPicker').value || todayISO());
+    renderVacancies(); renderHUD(); renderProgress();
+    toast(APPS_SCRIPT_URL ? 'Connected to Google Sheets' : 'Disconnected, working locally');
+  });
+
+  document.getElementById('btnSyncNow').addEventListener('click', async ()=>{
+    if(!APPS_SCRIPT_URL){ toast('Connect Google Sheets first'); return; }
+    toast('Syncing…');
+    const remote = await apiGetState();
+    if(remote){
+      state = {vacancies: remote.vacancies||[], dailyLogs: remote.dailyLogs||{}, weeklyReviews: remote.weeklyReviews||{}};
+      await saveLocalCache();
+      loadDayForm(document.getElementById('dayPicker').value || todayISO());
+      renderWeekReflections(document.getElementById('weekPicker').value || weekStart(todayISO()));
+      renderVacancies(); renderHUD(); renderProgress();
+      toast('Synced with Google Sheets');
+    } else {
+      toast('Sync failed — check the connection');
+    }
+  });
+
+  await loadState();
+  document.getElementById('dayPicker').value = todayISO();
+  document.getElementById('weekPicker').value = weekStart(todayISO());
+  document.getElementById('progressWeekPicker').value = weekStart(todayISO());
+  renderWeekReflections(weekStart(todayISO()));
+  loadDayForm(todayISO());
+  renderVacancies();
+  renderHUD();
+  renderProgress();
+
+  document.getElementById('progressWeekPicker').addEventListener('change', e=> renderProgress(e.target.value));
+  document.getElementById('btnProgressThisWeek').addEventListener('click', ()=>{
+    const cur = weekStart(todayISO());
+    document.getElementById('progressWeekPicker').value = cur;
+    renderProgress(cur);
+  });
+
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click', ()=> switchTab(t.dataset.tab));
+  });
+
+  document.getElementById('btnToday').addEventListener('click', ()=>{
+    document.getElementById('dayPicker').value = todayISO();
+    loadDayForm(todayISO());
+  });
+  document.getElementById('dayPicker').addEventListener('change', e=> loadDayForm(e.target.value));
+
+  document.querySelectorAll('#panel-today input, #panel-today textarea').forEach(el=>{
+    el.addEventListener('input', updateDayXpPreview);
+  });
+
+  document.getElementById('btnSaveDay').addEventListener('click', async ()=>{
+    const iso = document.getElementById('dayPicker').value || todayISO();
+    const existing = state.dailyLogs[iso] || {};
+    const draft = readDayForm();
+    const addedXP = dayXP(draft);
+    const merged = mergeLogs(existing, draft);
+    state.dailyLogs[iso] = merged;
+    await saveLocalCache();
+    const synced = apiPost('saveDayLog', {date: iso, log: merged});
+    loadDayForm(iso);
+    renderHUD(); renderProgress();
+    const xpToday = dayXP(merged);
+    const otherDays = Object.entries(state.dailyLogs).filter(([d])=>d!==iso).map(([,l])=>dayXP(l));
+    const avg = otherDays.length ? otherDays.reduce((a,b)=>a+b,0)/otherDays.length : 0;
+    const notice = synced ? '' : ' · ⚠️ not connected to Sheets, saved locally only';
+    if(otherDays.length >= 3 && xpToday > avg * 1.4){
+      toast('🔥 Added +' + addedXP + ' XP · today is well above your usual pace, great push!' + notice);
+    } else {
+      toast('Added +' + addedXP + ' XP · today\'s total is ' + xpToday + ' XP' + notice);
+    }
+  });
+
+  document.getElementById('btnAddVacancy').addEventListener('click', async ()=>{
+    const company = document.getElementById('vCompany').value.trim();
+    const role = document.getElementById('vRole').value.trim();
+    if(!company || !role){ toast('Enter a company and role'); return; }
+    const v = {
+      id: 'v'+Date.now(),
+      company, role,
+      location: document.getElementById('vLocation').value.trim(),
+      salary: document.getElementById('vSalary').value.trim(),
+      source: document.getElementById('vSource').value,
+      link: document.getElementById('vLink').value.trim(),
+      status: document.getElementById('vStatus').value,
+      nextStep: document.getElementById('vNextStep').value.trim(),
+      nextDate: document.getElementById('vNextDate').value,
+      notes: document.getElementById('vNotes').value.trim(),
+      dateAdded: todayISO(),
+    };
+    state.vacancies.push(v);
+    await saveLocalCache();
+    apiPost('addVacancy', {vacancy: v});
+    ['vCompany','vRole','vLocation','vSalary','vLink','vNextStep','vNotes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('vNextDate').value='';
+    renderVacancies(); renderHUD(); renderProgress();
+    toast('Vacancy added to Mission Board');
+  });
+
+  document.getElementById('filterStatus').addEventListener('change', renderVacancies);
+
+  document.getElementById('btnSaveWeek').addEventListener('click', async ()=>{
+    const ws = document.getElementById('weekPicker').value;
+    state.weeklyReviews[ws] = {
+      wins: document.getElementById('w-wins').value,
+      interviews: document.getElementById('w-interviews').value,
+      worked: document.getElementById('w-worked').value,
+      notworked: document.getElementById('w-notworked').value,
+      surprise: document.getElementById('w-surprise').value,
+      change: document.getElementById('w-change').value,
+    };
+    await saveLocalCache();
+    apiPost('saveWeeklyReview', {weekStart: ws, review: state.weeklyReviews[ws]});
+    toast('Weekly review saved');
+  });
+
+  document.getElementById('weekPicker').addEventListener('change', e=>{
+    renderWeekReflections(e.target.value);
+    const rev = state.weeklyReviews[e.target.value] || {};
+    document.getElementById('w-wins').value = rev.wins||'';
+    document.getElementById('w-interviews').value = rev.interviews||'';
+    document.getElementById('w-worked').value = rev.worked||'';
+    document.getElementById('w-notworked').value = rev.notworked||'';
+    document.getElementById('w-surprise').value = rev.surprise||'';
+    document.getElementById('w-change').value = rev.change||'';
+  });
+}
+init();
+</script>
+</body>
+</html>
