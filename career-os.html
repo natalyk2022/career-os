@@ -155,7 +155,15 @@
       <div class="hud-stat">Contacts (total)<b id="statContacts">0</b></div>
       <div class="hud-stat">Comments (total)<b id="statComments">0</b></div>
       <div class="hud-stat">Likes (total)<b id="statLikes">0</b></div>
+      <div class="hud-stat">Posts (total)<b id="statPosts">0</b></div>
+      <div class="hud-stat">AI Lab videos<b id="statAiVideos">0</b></div>
+      <div class="hud-stat">Network contacts<b id="statNetwork">0</b></div>
       <div class="hud-stat">Interviews<b id="statInterviews">0</b></div>
+      <div class="hud-stat">Rejections<b id="statRejections">0</b></div>
+      <div class="hud-stat">AI learning, min<b id="statAiLearn">0</b></div>
+      <div class="hud-stat">AI practice, min<b id="statAiBuild">0</b></div>
+      <div class="hud-stat">English practice, min<b id="statEnglishPractice">0</b></div>
+      <div class="hud-stat">English movies, min<b id="statEnglishMovies">0</b></div>
     </div>
   </div>
 
@@ -479,6 +487,12 @@ function totalCount(s, field){
     if(field==='interviews') sum += (log.interviews||0);
     if(field==='post') sum += (log.post?1:0);
     if(field==='video') sum += (log.aiVideo?1:0);
+    if(field==='network') sum += (log.network||0);
+    if(field==='rejection') sum += (log.rejection||0);
+    if(field==='aiLearnMin') sum += (log.aiLearnMin||0);
+    if(field==='aiBuildMin') sum += (log.aiBuildMin||0);
+    if(field==='englishPracticeMin') sum += (log.englishPracticeMin||0);
+    if(field==='englishMoviesMin') sum += (log.englishMoviesMin||0);
   });
   return sum;
 }
@@ -571,6 +585,14 @@ function renderHUD(){
   document.getElementById('statComments').textContent = totalCount(state,'comments');
   document.getElementById('statLikes').textContent = totalCount(state,'likes');
   document.getElementById('statInterviews').textContent = totalCount(state,'interviews');
+  document.getElementById('statPosts').textContent = totalCount(state,'post');
+  document.getElementById('statAiVideos').textContent = totalCount(state,'video');
+  document.getElementById('statNetwork').textContent = totalCount(state,'network');
+  document.getElementById('statRejections').textContent = totalCount(state,'rejection');
+  document.getElementById('statAiLearn').textContent = totalCount(state,'aiLearnMin');
+  document.getElementById('statAiBuild').textContent = totalCount(state,'aiBuildMin');
+  document.getElementById('statEnglishPractice').textContent = totalCount(state,'englishPracticeMin');
+  document.getElementById('statEnglishMovies').textContent = totalCount(state,'englishMoviesMin');
 }
 
 const COUNT_FIELDS = ['in-apps-simple','in-apps-cv','in-apps-cover','in-apps-recruiter','in-apps-network','in-contacts','in-comments','in-likes','in-english-practice','in-english-movies','in-ai-learn','in-ai-build','in-interviews','in-rejection','in-network','in-interview-prep'];
@@ -588,16 +610,21 @@ function renderRecentDays(){
   const todayIso = todayISO();
   box.innerHTML = entries.map(([iso, log])=>{
     const apps = (log.appsSimple||0)+(log.appsCV||0)+(log.appsCover||0)+(log.appsRecruiter||0)+(log.appsNetwork||0);
-    const aiMin = (log.aiLearnMin||0)+(log.aiBuildMin||0);
-    const englishMin = (log.englishPracticeMin||0)+(log.englishMoviesMin||0);
     const parts = [];
     if(apps) parts.push(apps + ' apps');
     if(log.contacts) parts.push(log.contacts + ' contacts');
     if(log.comments) parts.push(log.comments + ' comments');
     if(log.likes) parts.push(log.likes + ' likes');
-    if(aiMin) parts.push(aiMin + ' min AI');
-    if(englishMin) parts.push(englishMin + ' min English');
+    if(log.aiLearnMin) parts.push(log.aiLearnMin + ' min AI learning');
+    if(log.aiBuildMin) parts.push(log.aiBuildMin + ' min AI practice');
+    if(log.englishPracticeMin) parts.push(log.englishPracticeMin + ' min English practice');
+    if(log.englishMoviesMin) parts.push(log.englishMoviesMin + ' min English movies');
+    if(log.post) parts.push('post');
+    if(log.aiVideo) parts.push('AI video');
+    if(log.network) parts.push(log.network + ' network');
+    if(log.interviewPrepMin) parts.push(log.interviewPrepMin + ' min prep');
     if(log.interviews) parts.push(log.interviews + ' interviews');
+    if(log.rejection) parts.push(log.rejection + ' rejections');
     const detail = parts.length ? parts.join(' · ') : 'no applications logged';
     return `<div class="recent-day">
       <span class="rd-date${iso===todayIso?' today':''}">${iso}${iso===todayIso?' (today)':''}</span>
@@ -632,9 +659,16 @@ function renderAlreadyLoggedBanner(iso){
   if(log.contacts) parts.push(log.contacts + ' contacts');
   if(log.comments) parts.push(log.comments + ' comments');
   if(log.likes) parts.push(log.likes + ' likes');
-  if((log.aiLearnMin||0)+(log.aiBuildMin||0) > 0) parts.push(((log.aiLearnMin||0)+(log.aiBuildMin||0)) + ' min AI');
-  if((log.englishPracticeMin||0)+(log.englishMoviesMin||0) > 0) parts.push(((log.englishPracticeMin||0)+(log.englishMoviesMin||0)) + ' min English');
+  if(log.aiLearnMin) parts.push(log.aiLearnMin + ' min AI learning');
+  if(log.aiBuildMin) parts.push(log.aiBuildMin + ' min AI practice');
+  if(log.englishPracticeMin) parts.push(log.englishPracticeMin + ' min English practice');
+  if(log.englishMoviesMin) parts.push(log.englishMoviesMin + ' min English movies');
+  if(log.post) parts.push('post published');
+  if(log.aiVideo) parts.push('AI Lab video recorded');
+  if(log.network) parts.push(log.network + ' network contacts');
+  if(log.interviewPrepMin) parts.push(log.interviewPrepMin + ' min interview prep');
   if(log.interviews) parts.push(log.interviews + ' interviews');
+  if(log.rejection) parts.push(log.rejection + ' rejections');
   banner.textContent = `✓ Already logged for ${iso}: ${xp} XP` + (parts.length ? ' (' + parts.join(', ') + ')' : '') + ' — anything you enter now will be added on top.';
   banner.style.display = 'block';
 }
