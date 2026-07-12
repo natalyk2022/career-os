@@ -322,7 +322,7 @@
     </div>
     <div class="card">
       <h3>The week in numbers</h3>
-      <div class="weekly-goal" id="wAppsRow"><span>Applications (soft ref. — 10/day)</span><span class="num" id="wApps">0 / 70</span></div>
+      <div class="weekly-goal" id="wAppsRow"><span>Applications (soft ref. — ~7/day)</span><span class="num" id="wApps">0 / 50</span></div>
       <div class="weekly-goal"><span>New LinkedIn contacts</span><span class="num" id="wContacts">0</span></div>
       <div class="weekly-goal" id="wCommentsRow"><span>Comments (soft ref. — 3/day)</span><span class="num" id="wComments">0 / 21</span></div>
       <div class="weekly-goal" id="wLikesRow"><span>Likes (soft ref. — 5/day)</span><span class="num" id="wLikes">0 / 35</span></div>
@@ -795,8 +795,8 @@ function renderProgress(weekStartIso){
   const praiseBox = document.getElementById('weeklyPraise');
   praiseBox.innerHTML = praises.length ? `<div class="praise-banner">${praises.join('<br>')}</div>` : '';
 
-  document.getElementById('wApps').textContent = `${ws.apps} / 70`;
-  document.getElementById('wAppsRow').classList.toggle('exceeded', ws.apps >= 70);
+  document.getElementById('wApps').textContent = `${ws.apps} / 50`;
+  document.getElementById('wAppsRow').classList.toggle('exceeded', ws.apps >= 50);
   document.getElementById('wContacts').textContent = ws.contacts;
   document.getElementById('wComments').textContent = `${ws.comments} / 21`;
   document.getElementById('wCommentsRow').classList.toggle('exceeded', ws.comments >= 21);
