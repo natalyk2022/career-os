@@ -153,6 +153,8 @@
       <div class="hud-stat">Streak<b id="statStreak">0</b></div>
       <div class="hud-stat">Applications (total)<b id="statApps">0</b></div>
       <div class="hud-stat">Contacts (total)<b id="statContacts">0</b></div>
+      <div class="hud-stat">Comments (total)<b id="statComments">0</b></div>
+      <div class="hud-stat">Likes (total)<b id="statLikes">0</b></div>
       <div class="hud-stat">Interviews<b id="statInterviews">0</b></div>
     </div>
   </div>
@@ -472,6 +474,8 @@ function totalCount(s, field){
   Object.values(s.dailyLogs||{}).forEach(log=>{
     if(field==='apps') sum += (log.appsSimple||0)+(log.appsCV||0)+(log.appsCover||0)+(log.appsRecruiter||0)+(log.appsNetwork||0);
     if(field==='contacts') sum += (log.contacts||0);
+    if(field==='comments') sum += (log.comments||0);
+    if(field==='likes') sum += (log.likes||0);
     if(field==='interviews') sum += (log.interviews||0);
     if(field==='post') sum += (log.post?1:0);
     if(field==='video') sum += (log.aiVideo?1:0);
@@ -564,6 +568,8 @@ function renderHUD(){
   document.getElementById('statStreak').textContent = getStreak();
   document.getElementById('statApps').textContent = totalCount(state,'apps');
   document.getElementById('statContacts').textContent = totalCount(state,'contacts');
+  document.getElementById('statComments').textContent = totalCount(state,'comments');
+  document.getElementById('statLikes').textContent = totalCount(state,'likes');
   document.getElementById('statInterviews').textContent = totalCount(state,'interviews');
 }
 
@@ -587,6 +593,8 @@ function renderRecentDays(){
     const parts = [];
     if(apps) parts.push(apps + ' apps');
     if(log.contacts) parts.push(log.contacts + ' contacts');
+    if(log.comments) parts.push(log.comments + ' comments');
+    if(log.likes) parts.push(log.likes + ' likes');
     if(aiMin) parts.push(aiMin + ' min AI');
     if(englishMin) parts.push(englishMin + ' min English');
     if(log.interviews) parts.push(log.interviews + ' interviews');
@@ -622,6 +630,8 @@ function renderAlreadyLoggedBanner(iso){
   const parts = [];
   if(apps) parts.push(apps + ' applications');
   if(log.contacts) parts.push(log.contacts + ' contacts');
+  if(log.comments) parts.push(log.comments + ' comments');
+  if(log.likes) parts.push(log.likes + ' likes');
   if((log.aiLearnMin||0)+(log.aiBuildMin||0) > 0) parts.push(((log.aiLearnMin||0)+(log.aiBuildMin||0)) + ' min AI');
   if((log.englishPracticeMin||0)+(log.englishMoviesMin||0) > 0) parts.push(((log.englishPracticeMin||0)+(log.englishMoviesMin||0)) + ' min English');
   if(log.interviews) parts.push(log.interviews + ' interviews');
