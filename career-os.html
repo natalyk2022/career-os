@@ -130,6 +130,12 @@
   .refl-date{font-family:var(--font-mono);font-size:11px;color:var(--gold);margin-bottom:4px;}
   .refl-line{font-size:12.5px;color:var(--text);margin-bottom:2px;}
   .refl-line b{color:var(--muted);font-weight:500;}
+  .recent-day{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
+  .recent-day:last-child{border-bottom:none;}
+  .recent-day .rd-date{font-family:var(--font-mono);color:var(--text);}
+  .recent-day .rd-date.today{color:var(--gold);}
+  .recent-day .rd-detail{color:var(--muted);flex:1;margin:0 10px;}
+  .recent-day .rd-xp{font-family:var(--font-mono);color:var(--green);white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -175,6 +181,7 @@
       <input type="date" id="dayPicker">
       <button class="secondary" id="btnToday" style="padding:6px 12px;font-size:12px;">Today</button>
     </div>
+    <div id="alreadyLoggedBanner" style="display:none;margin-bottom:14px;padding:10px 14px;border-radius:8px;background:rgba(76,154,120,.12);border:1px solid var(--green);font-size:12.5px;color:var(--green);"></div>
 
     <div class="card" id="block-1">
       <h3><span class="dot" style="background:#4CA870"></span>Block 1 · Applications<span class="card-xp" id="block-1-tag">0 / 20 XP min.</span></h3>
@@ -219,6 +226,11 @@
       <div class="field"><label>Today I did well because:</label><textarea id="in-r1"></textarea></div>
       <div class="field"><label>What concrete fact today moved me closer to my goal?</label><textarea id="in-r2"></textarea></div>
       <div class="field"><label>Tomorrow, the most important thing is:</label><textarea id="in-r3"></textarea></div>
+    </div>
+
+    <div class="card" id="recentDaysCard">
+      <h3>Recent days</h3>
+      <div id="recentDaysList"></div>
     </div>
 
     <button id="btnSaveDay" style="width:100%;padding:12px;font-size:14px;">Add to today · <span id="dayXpPreview">0 XP</span></button>
@@ -552,6 +564,36 @@ function renderHUD(){
 
 const COUNT_FIELDS = ['in-apps-simple','in-apps-cv','in-apps-cover','in-apps-recruiter','in-apps-network','in-contacts','in-comments','in-likes','in-english-practice','in-english-movies','in-ai-learn','in-ai-build','in-interviews','in-rejection','in-network','in-interview-prep'];
 const CHECK_FIELDS = ['in-post','in-ai-video'];
+function renderRecentDays(){
+  const box = document.getElementById('recentDaysList');
+  const entries = Object.entries(state.dailyLogs)
+    .filter(([,log]) => dayXP(log) > 0)
+    .sort((a,b) => a[0] < b[0] ? 1 : -1)
+    .slice(0, 7);
+  if(!entries.length){
+    box.innerHTML = '<div class="empty">No entries yet.</div>';
+    return;
+  }
+  const todayIso = todayISO();
+  box.innerHTML = entries.map(([iso, log])=>{
+    const apps = (log.appsSimple||0)+(log.appsCV||0)+(log.appsCover||0)+(log.appsRecruiter||0)+(log.appsNetwork||0);
+    const aiMin = (log.aiLearnMin||0)+(log.aiBuildMin||0);
+    const englishMin = (log.englishPracticeMin||0)+(log.englishMoviesMin||0);
+    const parts = [];
+    if(apps) parts.push(apps + ' apps');
+    if(log.contacts) parts.push(log.contacts + ' contacts');
+    if(aiMin) parts.push(aiMin + ' min AI');
+    if(englishMin) parts.push(englishMin + ' min English');
+    if(log.interviews) parts.push(log.interviews + ' interviews');
+    const detail = parts.length ? parts.join(' · ') : 'no applications logged';
+    return `<div class="recent-day">
+      <span class="rd-date${iso===todayIso?' today':''}">${iso}${iso===todayIso?' (today)':''}</span>
+      <span class="rd-detail">${detail}</span>
+      <span class="rd-xp">${dayXP(log)} XP</span>
+    </div>`;
+  }).join('');
+}
+
 function loadDayForm(iso){
   const log = state.dailyLogs[iso] || {};
   COUNT_FIELDS.forEach(id=> document.getElementById(id).value = 0);
@@ -560,6 +602,26 @@ function loadDayForm(iso){
   document.getElementById('in-r2').value = log.r2||'';
   document.getElementById('in-r3').value = log.r3||'';
   updateDayXpPreview();
+  renderRecentDays();
+  renderAlreadyLoggedBanner(iso);
+}
+function renderAlreadyLoggedBanner(iso){
+  const banner = document.getElementById('alreadyLoggedBanner');
+  const log = state.dailyLogs[iso];
+  const xp = log ? dayXP(log) : 0;
+  if(xp <= 0){
+    banner.style.display = 'none';
+    return;
+  }
+  const apps = (log.appsSimple||0)+(log.appsCV||0)+(log.appsCover||0)+(log.appsRecruiter||0)+(log.appsNetwork||0);
+  const parts = [];
+  if(apps) parts.push(apps + ' applications');
+  if(log.contacts) parts.push(log.contacts + ' contacts');
+  if((log.aiLearnMin||0)+(log.aiBuildMin||0) > 0) parts.push(((log.aiLearnMin||0)+(log.aiBuildMin||0)) + ' min AI');
+  if((log.englishPracticeMin||0)+(log.englishMoviesMin||0) > 0) parts.push(((log.englishPracticeMin||0)+(log.englishMoviesMin||0)) + ' min English');
+  if(log.interviews) parts.push(log.interviews + ' interviews');
+  banner.textContent = `✓ Already logged for ${iso}: ${xp} XP` + (parts.length ? ' (' + parts.join(', ') + ')' : '') + ' — anything you enter now will be added on top.';
+  banner.style.display = 'block';
 }
 function readDayForm(){
   return {
@@ -670,7 +732,7 @@ function renderProgress(weekStartIso){
   [1,2,3,4].forEach(k=>{
     const value = ws.blockTotals[k];
     const goal = BLOCK_MIN[k] * 7;
-    document.getElementById('wBlock'+k).textContent = `${value} / ${goal} XP`;
+    document.getElementById('wBlock'+k).textContent = k===1 ? `${value} / ${goal} XP (${ws.apps} applications)` : `${value} / ${goal} XP`;
     const met = value >= goal;
     document.getElementById('wBlock'+k+'Row').classList.toggle('exceeded', met);
     if(value > goal){
@@ -705,9 +767,19 @@ function renderProgress(weekStartIso){
   }).join('');
 }
 
-function switchTab(name){
+async function switchTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+name));
+  if(APPS_SCRIPT_URL){
+    const remote = await apiGetState();
+    if(remote){
+      state = {vacancies: remote.vacancies||[], dailyLogs: remote.dailyLogs||{}, weeklyReviews: remote.weeklyReviews||{}};
+      await saveLocalCache();
+      loadDayForm(document.getElementById('dayPicker').value || todayISO());
+      renderWeekReflections(document.getElementById('weekPicker').value || weekStart(todayISO()));
+      renderVacancies(); renderHUD(); renderProgress();
+    }
+  }
 }
 
 function renderWeekReflections(weekStartIso){
@@ -873,6 +945,18 @@ async function init(){
   });
 }
 init();
+
+setInterval(async ()=>{
+  if(!APPS_SCRIPT_URL) return;
+  const remote = await apiGetState();
+  if(remote){
+    state = {vacancies: remote.vacancies||[], dailyLogs: remote.dailyLogs||{}, weeklyReviews: remote.weeklyReviews||{}};
+    await saveLocalCache();
+    loadDayForm(document.getElementById('dayPicker').value || todayISO());
+    renderWeekReflections(document.getElementById('weekPicker').value || weekStart(todayISO()));
+    renderVacancies(); renderHUD(); renderProgress();
+  }
+}, 20000);
 </script>
 </body>
 </html>
