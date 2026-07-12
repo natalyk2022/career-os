@@ -413,9 +413,12 @@ async function apiGetState(){
   try{
     const res = await fetch(APPS_SCRIPT_URL + '?action=getState');
     if(!res.ok) throw new Error('bad response');
-    return await res.json();
+    const data = await res.json();
+    updateSyncStatus('ok');
+    return data;
   }catch(e){
     console.error('Career OS: failed to fetch data from Google Sheets', e);
+    updateSyncStatus('error');
     return null;
   }
 }
@@ -428,9 +431,11 @@ function apiPost(action, payload){
   fetch(url).catch(e => console.error('Career OS: failed to send data to Google Sheets', e));
   return true;
 }
-function updateSyncStatus(){
+function updateSyncStatus(state){
   const el = document.getElementById('syncStatus');
-  el.textContent = APPS_SCRIPT_URL ? '🟢 Google Sheets' : '⚪ local only';
+  if(!APPS_SCRIPT_URL){ el.textContent = '⚪ local only'; return; }
+  if(state === 'error'){ el.textContent = '🔴 Sheets connected but requests are failing'; return; }
+  el.textContent = '🟢 Google Sheets';
 }
 
 async function loadState(){
@@ -945,18 +950,6 @@ async function init(){
   });
 }
 init();
-
-setInterval(async ()=>{
-  if(!APPS_SCRIPT_URL) return;
-  const remote = await apiGetState();
-  if(remote){
-    state = {vacancies: remote.vacancies||[], dailyLogs: remote.dailyLogs||{}, weeklyReviews: remote.weeklyReviews||{}};
-    await saveLocalCache();
-    loadDayForm(document.getElementById('dayPicker').value || todayISO());
-    renderWeekReflections(document.getElementById('weekPicker').value || weekStart(todayISO()));
-    renderVacancies(); renderHUD(); renderProgress();
-  }
-}, 20000);
 </script>
 </body>
 </html>
