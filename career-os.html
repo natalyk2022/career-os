@@ -322,8 +322,10 @@
     </div>
     <div class="card">
       <h3>The week in numbers</h3>
-      <div class="weekly-goal"><span>Applications (all types)</span><span class="num" id="wApps">0</span></div>
+      <div class="weekly-goal" id="wAppsRow"><span>Applications (soft ref. — 10/day)</span><span class="num" id="wApps">0 / 70</span></div>
       <div class="weekly-goal"><span>New LinkedIn contacts</span><span class="num" id="wContacts">0</span></div>
+      <div class="weekly-goal" id="wCommentsRow"><span>Comments (soft ref. — 3/day)</span><span class="num" id="wComments">0 / 21</span></div>
+      <div class="weekly-goal" id="wLikesRow"><span>Likes (soft ref. — 5/day)</span><span class="num" id="wLikes">0 / 35</span></div>
       <div class="weekly-goal" id="wPostsRow"><span>Posts (soft goal — 2/week)</span><span class="num" id="wPosts">0 / 2</span></div>
       <div class="weekly-goal"><span>AI — practice minutes</span><span class="num" id="wAiMin">0</span></div>
       <div class="weekly-goal" style="border-bottom:none;"><span>English, hours</span><span class="num" id="wEnglish">0 h</span></div>
@@ -551,13 +553,15 @@ function weekStats(weekStartIso){
   const wsDate = new Date(weekStartIso);
   const weDate = new Date(wsDate);
   weDate.setDate(weDate.getDate()+7);
-  let apps=0, contacts=0, posts=0, aiMin=0, englishMin=0;
+  let apps=0, contacts=0, comments=0, likes=0, posts=0, aiMin=0, englishMin=0;
   const blockTotals = {1:0, 2:0, 3:0, 4:0};
   Object.entries(state.dailyLogs).forEach(([iso, log])=>{
     const d = new Date(iso);
     if(d >= wsDate && d < weDate){
       apps += (log.appsSimple||0)+(log.appsCV||0)+(log.appsCover||0)+(log.appsRecruiter||0)+(log.appsNetwork||0);
       contacts += log.contacts||0;
+      comments += log.comments||0;
+      likes += log.likes||0;
       posts += log.post?1:0;
       aiMin += (log.aiLearnMin||0)+(log.aiBuildMin||0);
       englishMin += (log.englishPracticeMin||0) + (log.englishMoviesMin||0);
@@ -565,7 +569,7 @@ function weekStats(weekStartIso){
       [1,2,3,4].forEach(k=> blockTotals[k] += bx[k]);
     }
   });
-  return {apps, contacts, posts, aiMin, englishMin, blockTotals};
+  return {apps, contacts, comments, likes, posts, aiMin, englishMin, blockTotals};
 }
 
 function renderHUD(){
@@ -791,8 +795,13 @@ function renderProgress(weekStartIso){
   const praiseBox = document.getElementById('weeklyPraise');
   praiseBox.innerHTML = praises.length ? `<div class="praise-banner">${praises.join('<br>')}</div>` : '';
 
-  document.getElementById('wApps').textContent = ws.apps;
+  document.getElementById('wApps').textContent = `${ws.apps} / 70`;
+  document.getElementById('wAppsRow').classList.toggle('exceeded', ws.apps >= 70);
   document.getElementById('wContacts').textContent = ws.contacts;
+  document.getElementById('wComments').textContent = `${ws.comments} / 21`;
+  document.getElementById('wCommentsRow').classList.toggle('exceeded', ws.comments >= 21);
+  document.getElementById('wLikes').textContent = `${ws.likes} / 35`;
+  document.getElementById('wLikesRow').classList.toggle('exceeded', ws.likes >= 35);
   document.getElementById('wAiMin').textContent = ws.aiMin;
   document.getElementById('wEnglish').textContent = (ws.englishMin/60).toFixed(1) + ' h';
   document.getElementById('wPosts').textContent = `${ws.posts} / 2`;
