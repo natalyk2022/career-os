@@ -211,15 +211,15 @@
     </div>
 
     <div class="card" id="block-3">
-      <h3><span class="dot" style="background:#B49FE0"></span>Block 3 · English<span class="card-xp" id="block-3-tag">0 / 6 XP min.</span></h3>
+      <h3><span class="dot" style="background:#B49FE0"></span>Block 3 · English<span class="card-xp" id="block-3-tag">0 / 3 XP min.</span></h3>
       <div class="count-row"><label>Active practice — tutor / mock interview / self-talk / recording yourself <span class="xp-tag">1 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-english-practice" value="0"></div>
       <div class="count-row"><label>Movies / series in English <span class="xp-tag">1 XP / 15 min</span></label><input type="number" min="0" step="5" id="in-english-movies" value="0"></div>
     </div>
 
     <div class="card" id="block-4">
-      <h3><span class="dot" style="background:#E0A24A"></span>Block 4 · AI<span class="card-xp" id="block-4-tag">0 / 3 XP min.</span></h3>
-      <div class="count-row"><label>Learning — course/article/video about AI <span class="xp-tag">0.5 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-ai-learn" value="0"></div>
-      <div class="count-row"><label>Practice — agent/automation/case <span class="xp-tag">0.2 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-ai-build" value="0"></div>
+      <h3><span class="dot" style="background:#E0A24A"></span>Block 4 · AI<span class="card-xp" id="block-4-tag">0 / 2 XP min.</span></h3>
+      <div class="count-row"><label>Learning — course/article/video about AI <span class="xp-tag">0.6 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-ai-learn" value="0"></div>
+      <div class="count-row"><label>Practice — agent/automation/case <span class="xp-tag">0.4 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-ai-build" value="0"></div>
       <div class="row"><input type="checkbox" id="in-ai-video"><label for="in-ai-video">Recorded a video for AI Lab</label><span class="xp-tag">15 XP</span></div>
     </div>
 
@@ -508,7 +508,7 @@ function dayXP(log){
   xp += (log.likes||0)*0.2;
   xp += log.post ? 10 : 0;
   xp += Math.round((log.englishPracticeMin||0)/10*1) + Math.round((log.englishMoviesMin||0)/15*1);
-  xp += (log.aiLearnMin||0)/10*0.5 + (log.aiBuildMin||0)/10*0.2 + (log.aiVideo?15:0);
+  xp += (log.aiLearnMin||0)/10*0.6 + (log.aiBuildMin||0)/10*0.4 + (log.aiVideo?15:0);
   xp += (log.network||0) * 5;
   xp += Math.round((log.interviewPrepMin||0)/10*1);
   xp += (log.interviews||0)*10;
@@ -708,10 +708,10 @@ function blockXP(log){
     1: (log.appsSimple||0)*2 + (log.appsCV||0)*5 + (log.appsCover||0)*3 + (log.appsRecruiter||0)*5 + (log.appsNetwork||0)*5,
     2: (log.contacts||0)*0.2 + (log.comments||0)*3 + (log.likes||0)*0.2 + (log.post?10:0),
     3: Math.round((log.englishPracticeMin||0)/10*1) + Math.round((log.englishMoviesMin||0)/15*1),
-    4: (log.aiLearnMin||0)/10*0.5 + (log.aiBuildMin||0)/10*0.2 + (log.aiVideo?15:0),
+    4: (log.aiLearnMin||0)/10*0.6 + (log.aiBuildMin||0)/10*0.4 + (log.aiVideo?15:0),
   };
 }
-const BLOCK_MIN = {1:20, 2:11, 3:6, 4:3};
+const BLOCK_MIN = {1:20, 2:11, 3:3, 4:2};
 function renderBlockHighlights(log){
   const bx = blockXP(log);
   Object.keys(BLOCK_MIN).forEach(k=>{
