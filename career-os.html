@@ -196,10 +196,10 @@
     <div class="card" id="block-1">
       <h3><span class="dot" style="background:#4CA870"></span>Block 1 · Applications<span class="card-xp" id="block-1-tag">0 / 20 XP min.</span></h3>
       <div class="count-row"><label>Simple application <span class="xp-tag">2 XP</span></label><input type="number" min="0" id="in-apps-simple" value="0"></div>
-      <div class="count-row"><label>+ tailored CV <span class="xp-tag">7 XP</span></label><input type="number" min="0" id="in-apps-cv" value="0"></div>
-      <div class="count-row"><label>+ cover letter <span class="xp-tag">5 XP</span></label><input type="number" min="0" id="in-apps-cover" value="0"></div>
-      <div class="count-row"><label>+ messaged the recruiter <span class="xp-tag">7 XP</span></label><input type="number" min="0" id="in-apps-recruiter" value="0"></div>
-      <div class="count-row"><label>Found through network <span class="xp-tag">10 XP</span></label><input type="number" min="0" id="in-apps-network" value="0"></div>
+      <div class="count-row"><label>+ tailored CV <span class="xp-tag">5 XP</span></label><input type="number" min="0" id="in-apps-cv" value="0"></div>
+      <div class="count-row"><label>+ cover letter <span class="xp-tag">3 XP</span></label><input type="number" min="0" id="in-apps-cover" value="0"></div>
+      <div class="count-row"><label>+ messaged the recruiter <span class="xp-tag">5 XP</span></label><input type="number" min="0" id="in-apps-recruiter" value="0"></div>
+      <div class="count-row"><label>Found through network <span class="xp-tag">5 XP</span></label><input type="number" min="0" id="in-apps-network" value="0"></div>
     </div>
 
     <div class="card" id="block-2">
@@ -212,14 +212,14 @@
 
     <div class="card" id="block-3">
       <h3><span class="dot" style="background:#B49FE0"></span>Block 3 · English<span class="card-xp" id="block-3-tag">0 / 6 XP min.</span></h3>
-      <div class="count-row"><label>Active practice — tutor / mock interview / self-talk / recording yourself <span class="xp-tag">1 XP / 5 min</span></label><input type="number" min="0" step="5" id="in-english-practice" value="0"></div>
+      <div class="count-row"><label>Active practice — tutor / mock interview / self-talk / recording yourself <span class="xp-tag">1 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-english-practice" value="0"></div>
       <div class="count-row"><label>Movies / series in English <span class="xp-tag">1 XP / 15 min</span></label><input type="number" min="0" step="5" id="in-english-movies" value="0"></div>
     </div>
 
     <div class="card" id="block-4">
       <h3><span class="dot" style="background:#E0A24A"></span>Block 4 · AI<span class="card-xp" id="block-4-tag">0 / 3 XP min.</span></h3>
-      <div class="count-row"><label>Learning — course/article/video about AI <span class="xp-tag">1 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-ai-learn" value="0"></div>
-      <div class="count-row"><label>Practice — agent/automation/case <span class="xp-tag">1 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-ai-build" value="0"></div>
+      <div class="count-row"><label>Learning — course/article/video about AI <span class="xp-tag">0.5 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-ai-learn" value="0"></div>
+      <div class="count-row"><label>Practice — agent/automation/case <span class="xp-tag">0.2 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-ai-build" value="0"></div>
       <div class="row"><input type="checkbox" id="in-ai-video"><label for="in-ai-video">Recorded a video for AI Lab</label><span class="xp-tag">15 XP</span></div>
     </div>
 
@@ -227,7 +227,7 @@
       <h3><span class="dot" style="background:#8B8D9B"></span>Bonus · networking, interviews, offers</h3>
       <div class="count-row"><label>Interview prep — STAR cases, mock questions, etc. <span class="xp-tag">1 XP / 10 min</span></label><input type="number" min="0" step="5" id="in-interview-prep" value="0"></div>
       <div class="count-row"><label>New network contact (reached out first / met someone / called outside an interview) <span class="xp-tag">5 XP each</span></label><input type="number" min="0" id="in-network" value="0"></div>
-      <div class="count-row"><label>Had an interview today <span class="xp-tag">20 XP</span></label><input type="number" min="0" id="in-interviews" value="0"></div>
+      <div class="count-row"><label>Had an interview today <span class="xp-tag">10 XP</span></label><input type="number" min="0" id="in-interviews" value="0"></div>
       <div class="count-row"><label>Rejection after an interview <span class="xp-tag">10 XP each</span></label><input type="number" min="0" id="in-rejection" value="0"></div>
     </div>
 
@@ -285,7 +285,8 @@
 
     <div class="card">
       <h3>All vacancies <span class="card-xp" id="vacancyCount">0</span></h3>
-      <div style="margin-bottom:10px;">
+      <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="text" id="filterCompany" placeholder="Search by company…" style="width:220px;">
         <select id="filterStatus" style="width:220px;display:inline-block;">
           <option value="">All statuses</option>
           <option>Applied</option><option>Screening</option><option>Interview</option>
@@ -498,18 +499,19 @@ function totalCount(s, field){
   });
   return sum;
 }
+function fmtXP(x){ return Math.round((x + Number.EPSILON) * 10) / 10; }
 function dayXP(log){
   let xp = 0;
-  xp += (log.appsSimple||0)*2 + (log.appsCV||0)*7 + (log.appsCover||0)*5 + (log.appsRecruiter||0)*7 + (log.appsNetwork||0)*10;
+  xp += (log.appsSimple||0)*2 + (log.appsCV||0)*5 + (log.appsCover||0)*3 + (log.appsRecruiter||0)*5 + (log.appsNetwork||0)*5;
   xp += (log.contacts||0)*0.2;
   xp += (log.comments||0)*3;
   xp += (log.likes||0)*0.2;
   xp += log.post ? 10 : 0;
-  xp += Math.round((log.englishPracticeMin||0)/5*1) + Math.round((log.englishMoviesMin||0)/15*1);
-  xp += Math.round((log.aiLearnMin||0)/10*1) + Math.round((log.aiBuildMin||0)/10*1) + (log.aiVideo?15:0);
+  xp += Math.round((log.englishPracticeMin||0)/10*1) + Math.round((log.englishMoviesMin||0)/15*1);
+  xp += (log.aiLearnMin||0)/10*0.5 + (log.aiBuildMin||0)/10*0.2 + (log.aiVideo?15:0);
   xp += (log.network||0) * 5;
   xp += Math.round((log.interviewPrepMin||0)/10*1);
-  xp += (log.interviews||0)*20;
+  xp += (log.interviews||0)*10;
   xp += (log.rejection||0) * 10;
   return xp;
 }
@@ -580,7 +582,7 @@ function renderHUD(){
   const progressInLevel = xp - current.min;
   const pct = next ? Math.min(100, (progressInLevel/span)*100) : 100;
   document.getElementById('hudBar').style.width = pct+'%';
-  document.getElementById('hudXpText').textContent = `${xp} XP`;
+  document.getElementById('hudXpText').textContent = `${fmtXP(xp)} XP`;
   document.getElementById('hudNextText').textContent = next ? `to "${next.name}": ${next.min - xp} XP` : 'max level reached';
   document.getElementById('hudLevelDesc').textContent = current.desc;
   document.getElementById('statStreak').textContent = getStreak();
@@ -633,7 +635,7 @@ function renderRecentDays(){
     return `<div class="recent-day">
       <span class="rd-date${iso===todayIso?' today':''}">${iso}${iso===todayIso?' (today)':''}</span>
       <span class="rd-detail">${detail}</span>
-      <span class="rd-xp">${dayXP(log)} XP</span>
+      <span class="rd-xp">${fmtXP(dayXP(log))} XP</span>
     </div>`;
   }).join('');
 }
@@ -673,7 +675,7 @@ function renderAlreadyLoggedBanner(iso){
   if(log.interviewPrepMin) parts.push(log.interviewPrepMin + ' min interview prep');
   if(log.interviews) parts.push(log.interviews + ' interviews');
   if(log.rejection) parts.push(log.rejection + ' rejections');
-  banner.textContent = `✓ Already logged for ${iso}: ${xp} XP` + (parts.length ? ' (' + parts.join(', ') + ')' : '') + ' — anything you enter now will be added on top.';
+  banner.textContent = `✓ Already logged for ${iso}: ${fmtXP(xp)} XP` + (parts.length ? ' (' + parts.join(', ') + ')' : '') + ' — anything you enter now will be added on top.';
   banner.style.display = 'block';
 }
 function readDayForm(){
@@ -703,10 +705,10 @@ function readDayForm(){
 }
 function blockXP(log){
   return {
-    1: (log.appsSimple||0)*2 + (log.appsCV||0)*7 + (log.appsCover||0)*5 + (log.appsRecruiter||0)*7 + (log.appsNetwork||0)*10,
+    1: (log.appsSimple||0)*2 + (log.appsCV||0)*5 + (log.appsCover||0)*3 + (log.appsRecruiter||0)*5 + (log.appsNetwork||0)*5,
     2: (log.contacts||0)*0.2 + (log.comments||0)*3 + (log.likes||0)*0.2 + (log.post?10:0),
-    3: Math.round((log.englishPracticeMin||0)/5*1) + Math.round((log.englishMoviesMin||0)/15*1),
-    4: Math.round((log.aiLearnMin||0)/10*1) + Math.round((log.aiBuildMin||0)/10*1) + (log.aiVideo?15:0),
+    3: Math.round((log.englishPracticeMin||0)/10*1) + Math.round((log.englishMoviesMin||0)/15*1),
+    4: (log.aiLearnMin||0)/10*0.5 + (log.aiBuildMin||0)/10*0.2 + (log.aiVideo?15:0),
   };
 }
 const BLOCK_MIN = {1:20, 2:11, 3:6, 4:3};
@@ -716,7 +718,7 @@ function renderBlockHighlights(log){
     const xp = bx[k];
     const met = xp >= BLOCK_MIN[k];
     document.getElementById('block-'+k).classList.toggle('block-met', met);
-    document.getElementById('block-'+k+'-tag').textContent = `${xp} / ${BLOCK_MIN[k]} XP min.${met?' ✓':''}`;
+    document.getElementById('block-'+k+'-tag').textContent = `${fmtXP(xp)} / ${BLOCK_MIN[k]} XP min.${met?' ✓':''}`;
   });
 }
 function mergeLogs(saved, draft){
@@ -738,31 +740,49 @@ function effectiveLog(iso){
 function updateDayXpPreview(){
   const iso = document.getElementById('dayPicker').value || todayISO();
   const log = effectiveLog(iso);
-  document.getElementById('dayXpPreview').textContent = dayXP(log) + ' XP total today';
+  document.getElementById('dayXpPreview').textContent = fmtXP(dayXP(log)) + ' XP total today';
   renderBlockHighlights(log);
 }
 
+const STATUS_OPTIONS = ['Applied','Screening','Interview','Offer','Rejected','Ghosted'];
 function renderVacancies(){
   const filter = document.getElementById('filterStatus').value;
+  const companyQuery = document.getElementById('filterCompany').value.trim().toLowerCase();
   const body = document.getElementById('vacancyBody');
   body.innerHTML = '';
-  const list = (state.vacancies||[]).filter(v => !filter || v.status===filter);
+  const list = (state.vacancies||[]).filter(v =>
+    (!filter || v.status===filter) &&
+    (!companyQuery || String(v.company||'').toLowerCase().includes(companyQuery))
+  );
   document.getElementById('vacancyCount').textContent = (state.vacancies||[]).length;
   document.getElementById('vacancyEmpty').style.display = list.length ? 'none' : 'block';
   list.slice().reverse().forEach(v=>{
     const tr = document.createElement('tr');
+    const statusOptions = STATUS_OPTIONS.map(s => `<option value="${s}"${s===v.status?' selected':''}>${s}</option>`).join('');
     tr.innerHTML = `
       <td>${escapeHtml(v.company)}</td>
       <td>${escapeHtml(v.role)}</td>
       <td>${escapeHtml(v.location||'')}</td>
       <td>${escapeHtml(v.salary||'')}</td>
       <td>${escapeHtml(v.source||'')}</td>
-      <td><span class="status-pill status-${v.status}">${v.status}</span></td>
+      <td><select class="status-pill status-${v.status}" data-status-for="${v.id}" style="border:none;font-family:var(--font-mono);cursor:pointer;">${statusOptions}</select></td>
       <td>${escapeHtml(v.nextStep||'')}${v.nextDate?' · '+v.nextDate:''}</td>
       <td class="link-cell">${v.link? `<a href="${escapeAttr(v.link)}" target="_blank">open</a>` : ''}</td>
       <td><button class="secondary" style="padding:4px 8px;font-size:11px;" data-del="${v.id}">✕</button></td>
     `;
     body.appendChild(tr);
+  });
+  body.querySelectorAll('[data-status-for]').forEach(sel=>{
+    sel.addEventListener('change', async ()=>{
+      const id = sel.dataset.statusFor;
+      const v = state.vacancies.find(x=>x.id===id);
+      if(!v) return;
+      v.status = sel.value;
+      sel.className = 'status-pill status-' + v.status;
+      await saveLocalCache();
+      apiPost('updateVacancy', {vacancy: v});
+      toast('Status updated for ' + v.company);
+    });
   });
   body.querySelectorAll('[data-del]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
@@ -785,11 +805,11 @@ function renderProgress(weekStartIso){
   [1,2,3,4].forEach(k=>{
     const value = ws.blockTotals[k];
     const goal = BLOCK_MIN[k] * 7;
-    document.getElementById('wBlock'+k).textContent = k===1 ? `${value} / ${goal} XP (${ws.apps} applications)` : `${value} / ${goal} XP`;
+    document.getElementById('wBlock'+k).textContent = k===1 ? `${fmtXP(value)} / ${goal} XP (${ws.apps} applications)` : `${fmtXP(value)} / ${goal} XP`;
     const met = value >= goal;
     document.getElementById('wBlock'+k+'Row').classList.toggle('exceeded', met);
     if(value > goal){
-      praises.push(`🔥 ${BLOCK_NAMES[k]} exceeded by ${value-goal} XP over the weekly minimum.`);
+      praises.push(`🔥 ${BLOCK_NAMES[k]} exceeded by ${fmtXP(value-goal)} XP over the weekly minimum.`);
     }
   });
   const praiseBox = document.getElementById('weeklyPraise');
@@ -942,9 +962,9 @@ async function init(){
     const avg = otherDays.length ? otherDays.reduce((a,b)=>a+b,0)/otherDays.length : 0;
     const notice = synced ? '' : ' · ⚠️ not connected to Sheets, saved locally only';
     if(otherDays.length >= 3 && xpToday > avg * 1.4){
-      toast('🔥 Added +' + addedXP + ' XP · today is well above your usual pace, great push!' + notice);
+      toast('🔥 Added +' + fmtXP(addedXP) + ' XP · today is well above your usual pace, great push!' + notice);
     } else {
-      toast('Added +' + addedXP + ' XP · today\'s total is ' + xpToday + ' XP' + notice);
+      toast('Added +' + fmtXP(addedXP) + ' XP · today\'s total is ' + fmtXP(xpToday) + ' XP' + notice);
     }
   });
 
